@@ -1,0 +1,138 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+  
+
+*{
+    font-family: "Poppins", sans-serif;
+}
+
+body{
+    background-color: rgb(175, 192, 209);
+}
+.wavebox{
+    background-color: rgb(35, 67, 98);
+    height: 50px;
+    padding-block: 10px;
+    padding-left: 10px;
+    padding: 10px;
+    border-radius: 0px 0px 10px 10px;
+    display: flex;
+    justify-content: center;
+}
+
+.wavebox .title {
+    color: white;
+    font-size: 20px;
+}
+
+.m-min{
+    margin-top: -6px;
+}
+
+.box-m{
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.box-m .title {
+    background-color: rgb(35, 67, 98);
+    width: 90%;
+    height: 40px;
+    font-size: 22px;
+    color: white;
+    text-align: center;
+    border-radius: 10px;
+    padding-block: 5px;
+}
+
+.imgresult{
+    background-color: aqua;
+    height: 70%;
+    width: 100%;
+}
+.wrapcard{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+.bottomimg{
+    margin-top: -280px;
+}
+.cardbottom{
+    width: 1300px; 
+    margin-inline: 10px; 
+    padding-inline: 70px; 
+    padding-block: 60px; 
+    border-radius: 20px;
+}
+.card1{
+    transition: all 0.5s ease-in-out;
+}
+.card1:hover{
+    transform: scale(1.1);
+}
+
+.rounded-custom-wak {
+    border-radius: 30px;
+}
+
+.animation:hover{
+    transform: scale(0.9);
+    transition: all 0.5s;
+    border: 5px solid black;
+}
+.heightmiddle{
+    height: 340px;
+}
+.addprojek{
+    color: white; 
+    font-size: 20px; 
+    margin-left: auto; 
+    margin-right: 5%;
+}
+.projek{
+    text-decoration: none;
+    color: white;
+}
+.projek:hover{
+    color: black;
+}
+
+@media (max-width: 767px) {
+    .bottomimg{
+        margin-top: -230px;
+    }
+}
+
+@media (max-width: 543px) {
+    .bottomimg{
+        margin-top: -120px;
+    }
+    .cardbottom{
+        padding: 10px;
+    }
+    .wavebox .title{
+        font-size: 15px;
+        align-content: center;
+    }
+}
+
+@media (max-width: 1399px) and (min-width: 1200px) {
+    .heightmiddle{
+        height: 305px;
+    }
+}
+
+@media (max-width: 1199px) and (min-width: 992px) {
+    .heightmiddle{
+        height: 272px;
+    }
+}
+
+@media (max-width: 991px) and (min-width: 768px) {
+    .heightmiddle{
+        height: 295px;
+    }
+}
+

@@ -1,0 +1,17 @@
+body{
+    background: linear-gradient(rgb(207, 210, 29), rgb(255, 252, 228));
+}
+
+.wraptittle{
+    background-color:  rgb(207, 210, 29);
+    width: 80%;
+    height: 100px;
+    align-content: center;
+    text-align: center;
+    color: white;
+    border-radius: 20px;
+}
+
+.button{
+    background-color: rgb(202, 204, 59);
+}
