@@ -17,6 +17,29 @@ export const metadata = {
   title: "Invizone Class | SMKS TI Muhammadiyah 1 Cikampek - Official Website",
   description: "Welcome to Invizone Class at SMKS TI Muhammadiyah 1 Cikampek. Discover our student community, achievements, and latest activities.",
   keywords: ["Invizone Class", "SMKS TI Muhammadiyah 1 Cikampek", "student website", "class community"],
+  authors: [{ name: "Fauzaro01", url: "https://fauzaro01.web.app" }],
+  creator: "Muhamad Fauzaan",
+  publisher: "Muhamad Fauzaan",
+  robots: {
+    index: true,
+    follow: true,
+    nocache: false,
+    googleBot: {
+      index: true,
+      follow: true,
+      noimageindex: false,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  metadataBase: new URL("https://invizon.web.app"),
+  alternates: {
+    canonical: "/",
+    languages: {
+      "id-ID": "/",
+    },
+  },
   openGraph: {
     title: "Invizone Class | SMKS TI Muhammadiyah 1 Cikampek",
     description: "Official website of Invizone Class showcasing our student community and achievements",
@@ -42,21 +65,8 @@ export const metadata = {
   alternates: {
     canonical: "https://invizon.web.app",
   },
-  robots: {
-    index: true,
-    follow: true,
-    nocache: false,
-    googleBot: {
-      index: true,
-      follow: true,
-      noimageindex: false,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
   verification: {
-    google: "your-google-verification-code",
+    google: "vSf9Jsb1ybtYu5fPMUtzzedrROegeQN9BJAw_RXCHHE",
   },
 }
 
