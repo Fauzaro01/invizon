@@ -3,7 +3,7 @@
 
 ## Tentang Website
 
-Website ini merupakan platform resmi dari kelas RPL I GEN 8 (Invizone) di SMKS TI Muhammadiyah 1 Cikampek. Dibangun dengan teknologi modern untuk menampilkan informasi, prestasi, dan aktivitas kelas.
+Website ini merupakan platform resmi dari kelas RPL I GEN 9 (Invizone) di SMKS TI Muhammadiyah 1 Cikampek. Dibangun dengan teknologi modern untuk menampilkan informasi, prestasi, dan aktivitas kelas.
 
 🔗 **Akses Website**: [https://invizon.web.app](https://invizon.web.app)
 
