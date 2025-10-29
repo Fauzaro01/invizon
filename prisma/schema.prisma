@@ -95,26 +95,21 @@ model User {
   sessions Session[]
 
   // Application relations
-  student  Student?
   posts    Post[]
   comments Comment[]
 
   @@map("users")
 }
 
-// Student model
+// Student model (display-only data)
 model Student {
-  id       String  @id @default(cuid())
-  nis      String  @unique // Student ID number
-  name     String
-  no       Int?    // Student number in class
-  quote    String?
-  avatar   String  @default("/gambar.webp")
-  role     String  @default("Student")
-
-  // Relations
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String  @id @default(cuid())
+  nis    String  @unique // Student ID number
+  name   String
+  no     Int?    // Student number in class
+  quote  String?
+  avatar String  @default("/gambar.webp")
+  role   String  @default("Student")
   
   // Student achievements
   achievements StudentAchievement[]
@@ -125,16 +120,15 @@ model Student {
   @@map("students")
 }
 
-// Teacher model (for display purposes)
+// Teacher model (display-only data)
 model Teacher {
-  id       String  @id @default(cuid())
-  nip      String  @unique // Teacher ID number
-  name     String
-  role     String  @default("Class Leader Teacher")
-  quote    String?
-  avatar   String?
-  subject  String? // Subject they teach
-  isActive Boolean @default(true)
+  id      String  @id @default(cuid())
+  nip     String  @unique // Teacher ID number
+  name    String  // Teacher name  
+  subject String? // Subject they teach
+  bio     String? // Teacher's bio/quote
+  avatar  String?
+  role    String  @default("Class Leader Teacher")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

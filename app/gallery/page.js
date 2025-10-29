@@ -1,26 +1,43 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
-
-const galleryImages = [
-  { id: 1, src: 'https://res.cloudinary.com/dtzcamtgb/image/upload/v1750305327/hariguru10_yzjyef.jpg', alt: 'Hari Guru Kelas 10 Bersama Guru Jurusan', category: 'class' },
-  { id: 2, src: 'https://res.cloudinary.com/dtzcamtgb/image/upload/v1750305329/hariguru10_2_hvusmw.jpg', alt: 'Hari Guru Kelas 10', category: 'class' },
-  { id: 3, src: 'https://res.cloudinary.com/dtzcamtgb/image/upload/v1750319199/bukber2024_pzkzvk.jpg', alt: 'Bukber Kelas 10', category: 'trips' },
-  { id: 4, src: 'https://res.cloudinary.com/dtzcamtgb/image/upload/v1750305326/classmeett11_bxu14n.jpg', alt: 'ClassMeet kelas 11', category: 'events' },
-  { id: 5, src: 'https://res.cloudinary.com/dtzcamtgb/image/upload/v1750305329/haribatik11_hsskpd.jpg', alt: 'Hari Batik Kelas 11', category: 'class' },
-  { id: 6, src: 'https://res.cloudinary.com/dtzcamtgb/image/upload/v1750305332/upacara11_d4xp4p.jpg', alt: 'Upacara Kelas 11', category: 'class' },
-  { id: 7, src: 'https://res.cloudinary.com/dtzcamtgb/image/upload/v1750305331/ramadhanberkah2025_uzyltx.jpg', alt: 'Ramadhan Berkah 2025', category: 'events' },
-  { id: 8, src: 'https://res.cloudinary.com/dtzcamtgb/image/upload/v1750305264/classmeet11_ilqved.jpg', alt: 'ClassMeet kelas 11 (Cowo)', category: 'events' },
-]
 
 export default function GalleryPage() {
   const [selectedImage, setSelectedImage] = useState(null)
   const [activeCategory, setActiveCategory] = useState('all')
+  const [galleryImages, setGalleryImages] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(null)
 
-  const filteredImages = activeCategory === 'all' 
-    ? galleryImages 
-    : galleryImages.filter(img => img.category === activeCategory)
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        setIsLoading(true)
+        const url = activeCategory === 'all' 
+          ? '/api/gallery' 
+          : `/api/gallery?category=${activeCategory}`
+          
+        const response = await fetch(url)
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch gallery images')
+        }
+        
+        const data = await response.json()
+        setGalleryImages(data)
+      } catch (err) {
+        console.error('Error fetching gallery images:', err)
+        setError(err.message)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchImages()
+  }, [activeCategory])
+
+  const filteredImages = galleryImages
 
   return (
     <div className="min-h-screen bg-gray-50 pt-24 pb-16 px-4 sm:px-6">
@@ -55,30 +72,62 @@ export default function GalleryPage() {
           ))}
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {filteredImages.map((image, index) => (
-            <motion.div
-              key={image.id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.05 }}
-              whileHover={{ scale: 1.02 }}
-              className="relative aspect-square overflow-hidden rounded-xl shadow-md cursor-pointer"
-              onClick={() => setSelectedImage(image)}
-            >
-              <Image
-                src={image.src}
-                alt={image.alt}
-                fill
-                className="object-cover transition-transform duration-300 hover:scale-105"
-                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                <span className="text-white text-sm font-medium">{image.alt}</span>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+        {isLoading && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="aspect-square bg-gray-200 rounded-xl animate-pulse"></div>
+            ))}
+          </div>
+        )}
+
+        {error && (
+          <div className="text-center py-12 bg-white rounded-xl shadow-md">
+            <div className="text-5xl mb-4">⚠️</div>
+            <h3 className="text-xl font-medium text-red-600 mb-2">Error Loading Gallery</h3>
+            <p className="text-gray-500">{error}</p>
+          </div>
+        )}
+
+        {!isLoading && !error && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {filteredImages.map((image, index) => (
+              <motion.div
+                key={image.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: index * 0.05 }}
+                whileHover={{ scale: 1.02 }}
+                className="relative aspect-square overflow-hidden rounded-xl shadow-md cursor-pointer"
+                onClick={() => setSelectedImage(image)}
+              >
+                <Image
+                  src={image.src}
+                  alt={image.alt}
+                  fill
+                  className="object-cover transition-transform duration-300 hover:scale-105"
+                  sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                  <span className="text-white text-sm font-medium">{image.alt}</span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
+
+        {!isLoading && !error && filteredImages.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-12 bg-white rounded-xl shadow-md"
+          >
+            <div className="text-5xl mb-4">📸</div>
+            <h3 className="text-xl font-medium text-gray-700 mb-2">
+              {activeCategory === 'all' ? 'No images yet' : 'No images in this category'}
+            </h3>
+            <p className="text-gray-500">Check back later for updates!</p>
+          </motion.div>
+        )}
 
         <AnimatePresence>
           {selectedImage && (

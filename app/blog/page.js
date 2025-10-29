@@ -1,7 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-import { collection, getDocs, query, orderBy, doc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import SearchBar from "@/components/SearchBar";
@@ -11,29 +9,24 @@ export default function BlogPage() {
   const [filteredPosts, setFilteredPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
         setIsLoading(true);
-        const invizoneDocRef = doc(db, "projects", "invizone");
-        const postsCollection = collection(invizoneDocRef, "posts");
-        const q = query(postsCollection, orderBy("createdAt", "desc"));
-        const querySnapshot = await getDocs(q);
-
-        const postsData = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          title: doc.data().title,
-          content: doc.data().content,
-          category: doc.data().category || "general",
-          imageUrl: doc.data().imageUrl || "/gambar.webp",
-          createdAt: doc.data().createdAt?.toDate() || new Date(),
-        }));
-
+        const response = await fetch('/api/posts');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch posts');
+        }
+        
+        const postsData = await response.json();
         setPosts(postsData);
         setFilteredPosts(postsData);
       } catch (error) {
         console.error("Error fetching posts:", error);
+        setError(error.message);
       } finally {
         setIsLoading(false);
       }
@@ -117,7 +110,19 @@ export default function BlogPage() {
           </div>
         )}
 
-        {!isLoading && (
+        {error && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-12 bg-white rounded-xl shadow-md"
+          >
+            <div className="text-5xl mb-4">⚠️</div>
+            <h3 className="text-xl font-medium text-red-600 mb-2">Error Loading Posts</h3>
+            <p className="text-gray-500">{error}</p>
+          </motion.div>
+        )}
+
+        {!isLoading && !error && (
           <div className="space-y-8">
             <AnimatePresence>
               {categoryFilteredPosts.map((post, index) => (
@@ -150,7 +155,7 @@ export default function BlogPage() {
                       </span>
                     </div>
                     <div className="text-sm text-gray-500 mb-4">
-                      {post.createdAt.toLocaleDateString("en-US", {
+                      {new Date(post.createdAt).toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "long",
                         day: "numeric",
@@ -167,7 +172,7 @@ export default function BlogPage() {
           </div>
         )}
 
-        {!isLoading && categoryFilteredPosts.length === 0 && (
+        {!isLoading && !error && categoryFilteredPosts.length === 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

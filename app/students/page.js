@@ -1,327 +1,76 @@
 "use client";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 
-const students = [
-  {
-    id: 1,
-    nis: "102001",
-    name: "Andi Sumantri",
-    role: "Class Leader Teacher",
-    quote:
-      "Education is the most powerful weapon which you can use to change the world.",
-    avatar: "https://cdn3d.iconscout.com/3d/premium/thumb/geek-student-3d-illustration-download-in-png-blend-fbx-gltf-file-formats--boy-man-avatar-pack-people-illustrations-4800738.png",
-    isTeacher: true,
-  },
-  {
-    no: 2,
-    name: "Adhitya Naruzaky Putra",
-    nis: "2324.5.001",
-    quote: "Belajar hari ini adalah hadiah untuk dirimu di masa depan.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 3,
-    name: "Adrian Maulana Rahman",
-    nis: "2324.5.002",
-    quote:
-      "Pendidikan adalah cahaya yang menuntun langkah dalam gelapnya kebodohan.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 4,
-    name: "Adrian Maulana Yusup",
-    nis: "2324.5.003",
-    quote:
-      "Setiap halaman yang kamu baca adalah langkah kecil menuju impianmu.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 5,
-    name: "Ahmad Kin Hirufael",
-    nis: "2324.5.004",
-    quote: "Jangan takut salah saat belajar, takutlah jika berhenti mencoba.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 6,
-    name: "Ahmad Yaisy Ramdhani",
-    nis: "2324.5.005",
-    quote:
-      "Ilmu bukan tentang siapa yang tercepat, tapi siapa yang tak berhenti berjalan.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 7,
-    name: "Amelani Julianti",
-    nis: "2324.5.006",
-    quote: "Sekolah adalah tempat menanam harapan dan menuai masa depan.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 8,
-    name: "Bartholomeus Immanuel Zebrian K",
-    nis: "2324.5.007",
-    quote:
-      "Semangat belajar adalah bahan bakar untuk menembus batas kemampuanmu.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 9,
-    name: "Dimas Bagus Prasetya",
-    nis: "2324.5.008",
-    quote: "Dengan belajar, kamu sedang membangun versi terbaik dari dirimu.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 10,
-    name: "Divana Kayla Syafira",
-    nis: "2324.5.009",
-    quote: "Gagal dalam satu ujian bukan berarti gagal menjadi luar biasa.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 11,
-    name: "Erna Eka Haryanti",
-    nis: "2324.5.010",
-    quote:
-      "Setiap pertanyaan yang kamu ajukan adalah tanda bahwa kamu sedang tumbuh.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 12,
-    name: "Fahreza Mustafid Zayyan Fattan",
-    nis: "2324.5.011",
-    quote:
-      "Waktu terbaik untuk belajar adalah saat kamu merasa malas melakukannya.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 13,
-    name: "Fahrotunnida Mauludia",
-    nis: "2324.5.012",
-    quote:
-      "Belajar bukan untuk jadi hebat dari orang lain, tapi untuk jadi lebih baik dari dirimu kemarin.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 14,
-    name: "Faiza Bagas Wiryawan",
-    nis: "2324.5.013",
-    quote:
-      "Satu ide yang kamu pelajari hari ini bisa mengubah seluruh hidupmu esok.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 15,
-    name: "Hafis Ramadhan",
-    nis: "2324.5.014",
-    quote:
-      "Tidak semua orang hebat pandai sejak lahir, mereka belajar tanpa henti.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 16,
-    name: "Ida Efarina",
-    nis: "2324.5.016",
-    quote: "Buku adalah teman yang tak pernah mengecewakan.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 17,
-    name: "Jesika Alfianda",
-    nis: "2324.5.017",
-    quote:
-      "Langkah kecil dalam belajar jauh lebih baik daripada tidak melangkah sama sekali.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 18,
-    name: "Lia Ramahwati",
-    nis: "2324.5.018",
-    quote:
-      "Semua orang pintar pernah duduk di bangku yang sama denganmu—bangku belajar.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 19,
-    name: "Maulana Rivqi",
-    nis: "2324.5.019",
-    quote: "Belajar membuat kamu bebas memilih masa depanmu sendiri.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 20,
-    name: "Mila Latifah Zahra",
-    nis: "2324.5.020",
-    quote: "Mimpi besar hanya bisa dicapai dengan ilmu yang terus bertambah.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 21,
-    name: "Muhamad Fauzaan",
-    nis: "2324.5.021",
-    quote: "Setiap pelajaran adalah bekal untuk menghadapi dunia nyata.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 22,
-    name: "Nadin Pertiwi Jaliyanti",
-    nis: "2324.5.023",
-    quote:
-      "Kegigihan dalam belajar lebih berharga daripada kepintaran tanpa usaha.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 23,
-    name: "Rahmi Suci Oktaviani",
-    nis: "2324.5.024",
-    quote:
-      "Bukan nilai yang menentukan masa depanmu, tapi kemauanmu untuk terus belajar.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 24,
-    name: "Ratu Maura Erlangga",
-    nis: "2324.5.026",
-    quote: "Belajarlah, bahkan ketika tidak ada yang menyuruhmu.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 25,
-    name: "Razy Mizan Muhammad Alby",
-    nis: "2324.5.027",
-    quote: "Ruang kelas adalah tempat di mana keajaiban kecil dimulai.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 26,
-    name: "Salman Yusup Farisi",
-    nis: "2324.5.028",
-    quote: "Pendidikan mengubah kesulitan menjadi peluang.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 27,
-    name: "Segara Banyu Bening",
-    nis: "2324.5.029",
-    quote:
-      "Jangan tunggu pintar untuk belajar—belajarlah untuk menjadi pintar.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 28,
-    name: "Sekar Rahayu",
-    nis: "2324.5.030",
-    quote:
-      "Setiap kesulitan saat belajar akan membentuk kekuatan dalam hidupmu.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 29,
-    name: "Sharliz Adina",
-    nis: "2324.5.031",
-    quote: "Belajar bukan tentang menjadi terbaik, tapi tentang menjadi siap.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 30,
-    name: "Shaumi Awalliya Zahrina",
-    nis: "2324.5.032",
-    quote:
-      "Satu jam belajar hari ini bisa menyelamatkanmu dari ratusan jam kesulitan di masa depan.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 31,
-    name: "Tristan Adriansyah",
-    nis: "2324.5.033",
-    quote: "Tidak semua pelajaran mudah, tapi semua pelajaran punya makna.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 32,
-    name: "Verlyza Alliqeu Junofian",
-    nis: "2324.5.034",
-    quote:
-      "Pendidikan tidak menjanjikan keberhasilan instan, tapi membuka jalan untuk mencapainya.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 33,
-    name: "Vhika Azhara",
-    nis: "2324.5.035",
-    quote: "Jika kamu ingin mengubah dunia, mulailah dengan membuka buku.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 34,
-    name: "Zakiyyah Ramadhani",
-    nis: "2324.5.036",
-    quote: "Kedisiplinan dalam belajar adalah jembatan menuju keberhasilan.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 35,
-    name: "Qurotu Aini",
-    nis: "2324.5.073",
-    quote: "Masa depanmu ditentukan oleh pilihan belajarmu hari ini.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 36,
-    name: "Citra Chaeruny",
-    nis: "2324.5.074",
-    quote: "Belajar mengajarkan kita bahwa kita selalu bisa lebih baik.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-  {
-    no: 37,
-    name: "Satria Dayanata Rizki",
-    nis: "2324.5.075",
-    quote:
-      "Ilmu yang kamu pelajari adalah warisan terbaik yang tak akan pernah hilang.",
-    avatar: "/gambar.webp",
-    role: "Student",
-  },
-];
-
 export default function StudentsPage() {
+  const [students, setStudents] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch('/api/students');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch students');
+        }
+        
+        const data = await response.json();
+        setStudents(data);
+      } catch (err) {
+        console.error('Error fetching students:', err);
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchStudents();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 pt-24 pb-16 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h1 className="text-3xl sm:text-4xl font-bold text-[#234362] mb-4">
+              Our Class Members
+            </h1>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Loading amazing people of Invizone...
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="bg-white rounded-xl shadow-md overflow-hidden animate-pulse">
+                <div className="h-48 bg-gray-200"></div>
+                <div className="p-6">
+                  <div className="h-6 bg-gray-200 rounded mb-4 w-3/4"></div>
+                  <div className="h-4 bg-gray-200 rounded mb-2 w-1/2"></div>
+                  <div className="h-20 bg-gray-200 rounded"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 pt-24 pb-16 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto text-center">
+          <h1 className="text-3xl font-bold text-red-600 mb-4">Error Loading Students</h1>
+          <p className="text-gray-600">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
   const teacher = students.find((s) => s.isTeacher);
   const classStudents = students.filter((s) => !s.isTeacher);
 
