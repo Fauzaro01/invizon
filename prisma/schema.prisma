@@ -1,0 +1,245 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// User roles enum
+enum UserRole {
+  USER
+  ADMIN
+}
+
+// Post categories enum
+enum PostCategory {
+  NEWS
+  EVENTS
+  ACHIEVEMENTS
+  ANNOUNCEMENTS
+}
+
+// Gallery categories enum
+enum GalleryCategory {
+  CLASS
+  EVENTS
+  TRIPS
+  ACHIEVEMENTS
+}
+
+// NextAuth.js Models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// User model for authentication and roles
+model User {
+  id            String    @id @default(cuid())
+  username      String?   @unique
+  email         String?   @unique
+  emailVerified DateTime?
+  password      String?   // For username/password auth
+  role          UserRole  @default(USER)
+  name          String?
+  image         String?   // Changed from avatar to match NextAuth
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // NextAuth relations
+  accounts Account[]
+  sessions Session[]
+
+  // Application relations
+  student  Student?
+  posts    Post[]
+  comments Comment[]
+
+  @@map("users")
+}
+
+// Student model
+model Student {
+  id       String  @id @default(cuid())
+  nis      String  @unique // Student ID number
+  name     String
+  no       Int?    // Student number in class
+  quote    String?
+  avatar   String  @default("/gambar.webp")
+  role     String  @default("Student")
+
+  // Relations
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Student achievements
+  achievements StudentAchievement[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("students")
+}
+
+// Teacher model (for display purposes)
+model Teacher {
+  id       String  @id @default(cuid())
+  nip      String  @unique // Teacher ID number
+  name     String
+  role     String  @default("Class Leader Teacher")
+  quote    String?
+  avatar   String?
+  subject  String? // Subject they teach
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("teachers")
+}
+
+// Posts model for blog/news
+model Post {
+  id          String       @id @default(cuid())
+  title       String
+  content     String       @db.Text
+  excerpt     String?      @db.Text
+  category    PostCategory @default(NEWS)
+  imageUrl    String?
+  isPublished Boolean      @default(true)
+  views       Int          @default(0)
+
+  // Relations
+  authorId String
+  author   User      @relation(fields: [authorId], references: [id])
+  comments Comment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("posts")
+}
+
+// Achievement model
+model Achievement {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @db.Text
+  date        DateTime
+  year        Int
+  imageUrl    String?
+  icon        String?  @default("🏆")
+  category    String?  @default("general")
+  isActive    Boolean  @default(true)
+
+  // Relations to students who earned this achievement
+  students StudentAchievement[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("achievements")
+}
+
+// Junction table for students and achievements (many-to-many)
+model StudentAchievement {
+  id      String @id @default(cuid())
+  
+  studentId     String
+  student       Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  
+  achievementId String
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  
+  position      String? // e.g., "1st Place", "Winner", "Participant"
+  notes         String?
+  earnedAt      DateTime @default(now())
+
+  @@unique([studentId, achievementId])
+  @@map("student_achievements")
+}
+
+// Gallery model for images
+model Gallery {
+  id          String          @id @default(cuid())
+  title       String
+  alt         String
+  imageUrl    String
+  category    GalleryCategory @default(CLASS)
+  description String?
+  isActive    Boolean         @default(true)
+  order       Int?            @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("gallery")
+}
+
+// Comment model for post comments (users can comment on admin posts)
+model Comment {
+  id        String  @id @default(cuid())
+  content   String  @db.Text
+  isActive  Boolean @default(true)
+
+  // Relations
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  // Reply functionality
+  parentId      String?
+  parent        Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies       Comment[] @relation("CommentReplies")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("comments")
+}

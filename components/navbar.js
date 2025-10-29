@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { useSession, signOut } from 'next-auth/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -9,6 +10,7 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const pathname = usePathname()
+  const { data: session, status } = useSession()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -75,6 +77,55 @@ export default function Navbar() {
                 )}
               </Link>
             ))}
+            
+            {/* Auth Section */}
+            <div className="flex items-center space-x-4 ml-4 pl-4 border-l border-white/20">
+              {status === 'loading' ? (
+                <div className="w-8 h-8 animate-spin rounded-full border-2 border-white/30 border-t-white"></div>
+              ) : session ? (
+                <div className="flex items-center space-x-3">
+                  {session.user.role === 'ADMIN' && (
+                    <Link
+                      href="/admin/dashboard"
+                      className="px-3 py-1 bg-white/10 text-white text-sm rounded-full hover:bg-white/20 transition"
+                    >
+                      Dashboard
+                    </Link>
+                  )}
+                  <div className="flex items-center space-x-2">
+                    <Image
+                      src={session.user.image || '/gambar.webp'}
+                      alt={session.user.name || 'User'}
+                      width={32}
+                      height={32}
+                      className="rounded-full"
+                    />
+                    <span className="text-white text-sm">{session.user.name || session.user.username}</span>
+                  </div>
+                  <button
+                    onClick={() => signOut()}
+                    className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded-full transition"
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-3">
+                  <Link
+                    href="/auth/login"
+                    className="px-4 py-2 text-white hover:text-gray-200 text-sm"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/auth/register"
+                    className="px-4 py-2 bg-white text-[#234362] rounded-full text-sm font-medium hover:bg-gray-100 transition"
+                  >
+                    Register
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
 
           <button 

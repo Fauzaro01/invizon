@@ -1,10 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    output: 'export',
-    images: {
-        unoptimized: true
-    },
-    trailingSlash: false,
+  images: {
+    remotePatterns: [
+        new URL('https://res.cloudinary.com/dtzcamtgb/**'),
+        new URL('https://cdn3d.iconscout.com/**'),
+        new URL('https://lh3.googleusercontent.com/a/**')
+    ],
+  },
 };
 
 export default nextConfig;

@@ -1,6 +1,7 @@
 import { Inter, Inter_Tight } from "next/font/google";
 import Navbar from "@/components/navbar";
 import { GoogleAnalytics } from '@next/third-parties/google'
+import { SessionProvider } from '@/components/SessionProvider'
 import "./globals.css";
 
 const InterFont = Inter({
@@ -76,8 +77,10 @@ export default function RootLayout({ children }) {
       <body
         className={`${InterFont.className } ${InterTight.className } antialiased bg-gray-50`}
       >
-       <Navbar />
-       <main>{children}</main>
+        <SessionProvider>
+          <Navbar />
+          <main>{children}</main>
+        </SessionProvider>
       </body>
       <GoogleAnalytics gaId="G-D4MYBFEEJ5"/>
     </html>
