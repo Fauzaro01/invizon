@@ -14,32 +14,53 @@ export default function AuthErrorPage() {
       case 'OAuthAccountNotLinked':
         return {
           title: 'Account Already Exists',
-          message: 'An account with this email already exists. Please sign in with your existing account or try a different email.',
-          suggestion: 'Try signing in with username/password if you have an existing account.'
+          message: 'This email is already registered with a different sign-in method.',
+          suggestion: 'Try signing in with your username/password, or you will be redirected to link your accounts.',
+          icon: '🔗',
+          showLinkOption: true
+        }
+      case 'EmailConflict':
+        return {
+          title: 'Email Already Registered',
+          message: 'An account with this email already exists.',
+          suggestion: 'Please use a different email address or sign in with existing credentials.',
+          icon: '📧',
+          showRegisterOption: true
         }
       case 'OAuthCreateAccount':
         return {
           title: 'Failed to Create Account',
           message: 'There was an error creating your account with Google.',
-          suggestion: 'Please try again or contact support if the problem persists.'
+          suggestion: 'Please try again or contact support if the problem persists.',
+          icon: '❌'
         }
       case 'EmailCreateAccount':
         return {
           title: 'Email Account Creation Failed',
           message: 'Failed to create account with this email.',
-          suggestion: 'Please try a different email or contact support.'
+          suggestion: 'Please try a different email or contact support.',
+          icon: '❌'
         }
       case 'Configuration':
         return {
           title: 'Configuration Error',
           message: 'There is a problem with the server configuration.',
-          suggestion: 'Please contact support for assistance.'
+          suggestion: 'Please contact support for assistance.',
+          icon: '⚙️'
+        }
+      case 'AccessDenied':
+        return {
+          title: 'Access Denied',
+          message: 'You do not have permission to sign in.',
+          suggestion: 'Contact the administrator if you believe this is an error.',
+          icon: '🚫'
         }
       default:
         return {
           title: 'Authentication Error',
           message: 'An unknown authentication error occurred.',
-          suggestion: 'Please try again or contact support if the problem persists.'
+          suggestion: 'Please try again or contact support if the problem persists.',
+          icon: '⚠️'
         }
     }
   }
@@ -61,7 +82,7 @@ export default function AuthErrorPage() {
             height={80}
             className="mx-auto rounded-full bg-gray-100 p-2 mb-4"
           />
-          <div className="text-6xl mb-4">⚠️</div>
+          <div className="text-6xl mb-4">{errorInfo.icon}</div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">{errorInfo.title}</h1>
         </div>
 
@@ -72,6 +93,31 @@ export default function AuthErrorPage() {
           </p>
         </div>
 
+        {error === 'OAuthAccountNotLinked' && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-left">
+            <h3 className="font-medium text-blue-900 mb-2">What happened?</h3>
+            <p className="text-sm text-blue-800 mb-3">
+              You tried to sign in with Google, but this email is already registered with username/password.
+            </p>
+            <h4 className="font-medium text-blue-900 mb-1">Solutions:</h4>
+            <ul className="text-sm text-blue-800 space-y-1">
+              <li>• Sign in with your username/password</li>
+              <li>• Try Google sign-in again to link accounts</li>
+            </ul>
+          </div>
+        )}
+
+        {error === 'EmailConflict' && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-left">
+            <h3 className="font-medium text-blue-900 mb-2">Quick Solutions:</h3>
+            <ul className="text-sm text-blue-800 space-y-1">
+              <li>• Sign in with your username/password</li>
+              <li>• Use a different Google account</li>
+              <li>• Contact support to merge accounts</li>
+            </ul>
+          </div>
+        )}
+
         <div className="space-y-3">
           <motion.button
             whileHover={{ scale: 1.02 }}
@@ -79,15 +125,17 @@ export default function AuthErrorPage() {
             onClick={() => router.push('/auth/login')}
             className="w-full py-3 px-4 bg-[#234362] text-white rounded-lg font-medium hover:bg-[#1a3450] transition-colors"
           >
-            Try Again
+            Back to Sign In
           </motion.button>
 
-          <Link
-            href="/auth/register"
-            className="block w-full py-3 px-4 border border-[#234362] text-[#234362] rounded-lg font-medium hover:bg-[#234362]/5 transition-colors"
-          >
-            Create New Account
-          </Link>
+          {errorInfo.showRegisterOption && (
+            <Link
+              href="/auth/register"
+              className="block w-full py-3 px-4 border border-[#234362] text-[#234362] rounded-lg font-medium hover:bg-[#234362]/5 transition-colors"
+            >
+              Register with Different Email
+            </Link>
+          )}
 
           <Link
             href="/"

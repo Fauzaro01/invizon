@@ -1,19 +1,30 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { signIn, getSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import Image from 'next/image'
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [formData, setFormData] = useState({
     username: '',
     password: ''
   })
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+
+  // Check for error parameters
+  useEffect(() => {
+    const errorParam = searchParams?.get('error')
+    if (errorParam === 'EmailConflict') {
+      setError('This email is already registered. Please sign in with your existing account.')
+    } else if (errorParam === 'OAuthAccountNotLinked') {
+      setError('Account linking is available. Try signing in with Google again to link your accounts.')
+    }
+  }, [searchParams])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
