@@ -16,10 +16,11 @@
     "@prisma/client": "^6.17.1",
     "@types/bcryptjs": "^2.4.6",
     "bcryptjs": "^3.0.2",
-    "firebase": "^11.9.1",
+    "cloudinary": "^2.8.0",
     "framer-motion": "^12.16.0",
     "next": "15.3.3",
     "next-auth": "^4.24.11",
+    "next-cloudinary": "^6.17.5",
     "next-sitemap": "^4.2.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

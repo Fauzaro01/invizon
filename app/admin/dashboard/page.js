@@ -2,24 +2,20 @@
 import { useState, useEffect } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { motion, AnimatePresence } from 'framer-motion'
-import Image from 'next/image'
+import { redirect } from 'next/navigation'
 
-// Import components for each management section
-import StudentManagement from '@/components/admin/StudentManagement'
+// Import management components
+import StudentTeacherManagement from '@/components/admin/StudentTeacherManagement'
 import PostManagement from '@/components/admin/PostManagement'
-import TeacherManagement from '@/components/admin/TeacherManagement'
 import AchievementManagement from '@/components/admin/AchievementManagement'
 import GalleryManagement from '@/components/admin/GalleryManagement'
-import CommentManagement from '@/components/admin/CommentManagement'
 
 const menuItems = [
   { id: 'overview', name: 'Overview', icon: '📊' },
-  { id: 'students', name: 'Students', icon: '👥' },
-  { id: 'posts', name: 'Posts', icon: '📝' },
-  { id: 'teachers', name: 'Teachers', icon: '👨‍🏫' },
+  { id: 'students', name: 'Students & Teachers', icon: '👥' },
+  { id: 'posts', name: 'Blog Posts', icon: '📝' },
   { id: 'achievements', name: 'Achievements', icon: '🏆' },
   { id: 'gallery', name: 'Gallery', icon: '📷' },
-  { id: 'comments', name: 'Comments', icon: '💬' },
 ]
 
 export default function AdminDashboard() {
@@ -30,22 +26,29 @@ export default function AdminDashboard() {
     posts: 0,
     teachers: 0,
     achievements: 0,
-    gallery: 0,
-    comments: 0
+    gallery: 0
   })
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    if (status === 'unauthenticated') {
+      redirect('/auth/login')
+    }
     if (status === 'authenticated') {
+      if (session?.user?.role !== 'ADMIN') {
+        redirect('/')
+      }
       fetchStats()
     }
-  }, [status])
+  }, [status, session])
 
   const fetchStats = async () => {
     try {
       const response = await fetch('/api/admin/stats')
-      const data = await response.json()
-      setStats(data)
+      if (response.ok) {
+        const data = await response.json()
+        setStats(data)
+      }
     } catch (error) {
       console.error('Failed to fetch stats:', error)
     } finally {
@@ -84,19 +87,13 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white shadow-sm border-b sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <Image
-                src="/invizone.webp"
-                alt="Invizone"
-                width={40}
-                height={40}
-                className="rounded-full"
-              />
-              <h1 className="ml-3 text-xl font-bold text-gray-900">
-                Admin Dashboard
+              <div className="text-2xl mr-3">🎓</div>
+              <h1 className="text-xl font-bold text-gray-900">
+                Invizone Admin
               </h1>
             </div>
             
@@ -119,7 +116,7 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <nav className="space-y-2">
+            <nav className="space-y-2 sticky top-24">
               {menuItems.map((item) => (
                 <motion.button
                   key={item.id}
@@ -153,27 +150,75 @@ export default function AdminDashboard() {
                   <div>
                     <h2 className="text-2xl font-bold text-gray-900 mb-6">Dashboard Overview</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                      {Object.entries(stats).map(([key, value]) => {
-                        const item = menuItems.find(m => m.id === key)
-                        return (
-                          <motion.div
-                            key={key}
-                            whileHover={{ scale: 1.05 }}
-                            className="bg-white p-6 rounded-xl shadow-sm border cursor-pointer"
-                            onClick={() => setActiveTab(key)}
-                          >
-                            <div className="flex items-center">
-                              <div className="text-3xl mr-4">{item?.icon}</div>
-                              <div>
-                                <p className="text-sm font-medium text-gray-600 capitalize">
-                                  {key}
-                                </p>
-                                <p className="text-2xl font-bold text-gray-900">{value}</p>
-                              </div>
-                            </div>
-                          </motion.div>
-                        )
-                      })}
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        className="bg-white p-6 rounded-xl shadow-sm border cursor-pointer"
+                        onClick={() => setActiveTab('students')}
+                      >
+                        <div className="flex items-center">
+                          <div className="text-3xl mr-4">👥</div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-600">Students</p>
+                            <p className="text-2xl font-bold text-gray-900">{stats.students}</p>
+                          </div>
+                        </div>
+                      </motion.div>
+
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        className="bg-white p-6 rounded-xl shadow-sm border cursor-pointer"
+                        onClick={() => setActiveTab('students')}
+                      >
+                        <div className="flex items-center">
+                          <div className="text-3xl mr-4">👨‍🏫</div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-600">Teachers</p>
+                            <p className="text-2xl font-bold text-gray-900">{stats.teachers}</p>
+                          </div>
+                        </div>
+                      </motion.div>
+
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        className="bg-white p-6 rounded-xl shadow-sm border cursor-pointer"
+                        onClick={() => setActiveTab('posts')}
+                      >
+                        <div className="flex items-center">
+                          <div className="text-3xl mr-4">📝</div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-600">Posts</p>
+                            <p className="text-2xl font-bold text-gray-900">{stats.posts}</p>
+                          </div>
+                        </div>
+                      </motion.div>
+
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        className="bg-white p-6 rounded-xl shadow-sm border cursor-pointer"
+                        onClick={() => setActiveTab('achievements')}
+                      >
+                        <div className="flex items-center">
+                          <div className="text-3xl mr-4">🏆</div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-600">Achievements</p>
+                            <p className="text-2xl font-bold text-gray-900">{stats.achievements}</p>
+                          </div>
+                        </div>
+                      </motion.div>
+
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        className="bg-white p-6 rounded-xl shadow-sm border cursor-pointer"
+                        onClick={() => setActiveTab('gallery')}
+                      >
+                        <div className="flex items-center">
+                          <div className="text-3xl mr-4">📷</div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-600">Gallery</p>
+                            <p className="text-2xl font-bold text-gray-900">{stats.gallery}</p>
+                          </div>
+                        </div>
+                      </motion.div>
                     </div>
 
                     <div className="bg-white rounded-xl shadow-sm border p-6">
@@ -193,8 +238,8 @@ export default function AdminDashboard() {
                           className="p-4 text-left border border-gray-200 rounded-lg hover:border-[#234362] hover:bg-[#234362]/5 transition-colors"
                         >
                           <div className="text-lg mb-2">👥</div>
-                          <h4 className="font-medium text-gray-900">Add Student</h4>
-                          <p className="text-sm text-gray-600">Register new student</p>
+                          <h4 className="font-medium text-gray-900">Add Student/Teacher</h4>
+                          <p className="text-sm text-gray-600">Register new student or teacher</p>
                         </button>
                         
                         <button
@@ -210,12 +255,10 @@ export default function AdminDashboard() {
                   </div>
                 )}
 
-                {activeTab === 'students' && <StudentManagement />}
+                {activeTab === 'students' && <StudentTeacherManagement />}
                 {activeTab === 'posts' && <PostManagement />}
-                {activeTab === 'teachers' && <TeacherManagement />}
                 {activeTab === 'achievements' && <AchievementManagement />}
                 {activeTab === 'gallery' && <GalleryManagement />}
-                {activeTab === 'comments' && <CommentManagement />}
               </motion.div>
             </AnimatePresence>
           </div>

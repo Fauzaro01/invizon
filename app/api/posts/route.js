@@ -10,7 +10,7 @@ export async function GET(request) {
     const category = searchParams.get('category')
     
     const whereClause = {
-      published: true,
+      isPublished: true,
       ...(category && category !== 'all' && { category })
     }
 
@@ -55,7 +55,7 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json()
-    const { title, content, category, imageUrl, authorId, published = false } = body
+    const { title, content, category, imageUrl, authorId, isPublished = false } = body
 
     // Validate required fields
     if (!title || !content || !authorId) {
@@ -84,7 +84,7 @@ export async function POST(request) {
         category: category || 'general',
         imageUrl: imageUrl || '/gambar.webp',
         authorId,
-        published
+        isPublished
       },
       include: {
         author: {

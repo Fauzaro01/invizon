@@ -1,5 +1,5 @@
 import { Inter, Inter_Tight } from "next/font/google";
-import Navbar from "@/components/navbar";
+import ConditionalNavbar from "@/components/ConditionalNavbar";
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { SessionProvider } from '@/components/SessionProvider'
 import "./globals.css";
@@ -78,7 +78,7 @@ export default function RootLayout({ children }) {
         className={`${InterFont.className } ${InterTight.className } antialiased bg-gray-50`}
       >
         <SessionProvider>
-          <Navbar />
+          <ConditionalNavbar />
           <main>{children}</main>
         </SessionProvider>
       </body>
