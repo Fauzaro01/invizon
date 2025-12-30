@@ -4,12 +4,13 @@ import { PrismaClient } from '@/lib/generated/prisma'
 const prisma = new PrismaClient()
 
 // GET - Fetch single gallery image by ID
-export async function GET(request, { params }) {
+export async function GET(request, props) {
+  const params = await props.params;
   try {
     const { id } = params
     
     const image = await prisma.gallery.findUnique({
-      where: { id: parseInt(id) }
+      where: { id: id }
     })
 
     if (!image) {
@@ -30,14 +31,15 @@ export async function GET(request, { params }) {
 }
 
 // PUT - Update gallery image
-export async function PUT(request, { params }) {
+export async function PUT(request, props) {
+  const params = await props.params;
   try {
     const { id } = params
     const body = await request.json()
     const { title, imageUrl, alt, category, description } = body
 
     const existingImage = await prisma.gallery.findUnique({
-      where: { id: parseInt(id) }
+      where: { id: id }
     })
 
     if (!existingImage) {
@@ -61,7 +63,7 @@ export async function PUT(request, { params }) {
     }
 
     const updatedImage = await prisma.gallery.update({
-      where: { id: parseInt(id) },
+      where: { id: id },
       data: {
         ...(title && { title }),
         ...(imageUrl && { imageUrl }),
@@ -82,12 +84,13 @@ export async function PUT(request, { params }) {
 }
 
 // DELETE - Delete gallery image
-export async function DELETE(request, { params }) {
+export async function DELETE(request, props) {
+  const params = await props.params;
   try {
     const { id } = params
     
     const existingImage = await prisma.gallery.findUnique({
-      where: { id: parseInt(id) }
+      where: { id: id }
     })
 
     if (!existingImage) {
@@ -98,7 +101,7 @@ export async function DELETE(request, { params }) {
     }
 
     await prisma.gallery.delete({
-      where: { id: parseInt(id) }
+      where: { id: id }
     })
 
     return NextResponse.json({ message: 'Gallery image deleted successfully' })

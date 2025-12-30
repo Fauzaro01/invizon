@@ -3,7 +3,8 @@ import { requireAdmin } from '@/lib/session'
 import { AdminService, prisma } from '@/lib/services'
 
 // PUT - Update student
-export async function PUT(request, { params }) {
+export async function PUT(request, props) {
+  const params = await props.params;
   try {
     await requireAdmin()
 
@@ -52,7 +53,8 @@ export async function PUT(request, { params }) {
 }
 
 // DELETE - Delete student
-export async function DELETE(request, { params }) {
+export async function DELETE(request, props) {
+  const params = await props.params;
   try {
     await requireAdmin()
 

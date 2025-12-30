@@ -4,12 +4,13 @@ import { PrismaClient } from '@/lib/generated/prisma'
 const prisma = new PrismaClient()
 
 // GET - Fetch single student by ID
-export async function GET(request, { params }) {
+export async function GET(request, props) {
+  const params = await props.params;
   try {
     const { id } = params
     
     const student = await prisma.student.findUnique({
-      where: { id: parseInt(id) }
+      where: { id: id }
     })
 
     if (!student) {
@@ -30,14 +31,15 @@ export async function GET(request, { params }) {
 }
 
 // PUT - Update student
-export async function PUT(request, { params }) {
+export async function PUT(request, props) {
+  const params = await props.params;
   try {
     const { id } = params
     const body = await request.json()
     const { name, nis, quote, avatar } = body
 
     const student = await prisma.student.findUnique({
-      where: { id: parseInt(id) }
+      where: { id: id }
     })
 
     if (!student) {
@@ -49,7 +51,7 @@ export async function PUT(request, { params }) {
 
     // Update student information
     const updatedStudent = await prisma.student.update({
-      where: { id: parseInt(id) },
+      where: { id: id },
       data: {
         ...(name && { name }),
         ...(nis && { nis }),
@@ -69,12 +71,14 @@ export async function PUT(request, { params }) {
 }
 
 // DELETE - Delete student
-export async function DELETE(request, { params }) {
+export async function DELETE(request, props) {
+  const params = await props.params;
+  console.log(params);
   try {
     const { id } = params
     
     const student = await prisma.student.findUnique({
-      where: { id: parseInt(id) }
+      where: { id: id }
     })
 
     if (!student) {
@@ -86,7 +90,7 @@ export async function DELETE(request, { params }) {
 
     // Delete student
     await prisma.student.delete({
-      where: { id: parseInt(id) }
+      where: { id: id }
     })
 
     return NextResponse.json({ message: 'Student deleted successfully' })
