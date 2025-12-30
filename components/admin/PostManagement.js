@@ -3,8 +3,10 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import ImageUpload from './ImageUpload'
+import { useSession } from 'next-auth/react'
 
 export default function PostManagement() {
+  const { data: session } = useSession()
   const [posts, setPosts] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [showAddForm, setShowAddForm] = useState(false)
@@ -13,7 +15,9 @@ export default function PostManagement() {
     title: '',
     content: '',
     excerpt: '',
-    featuredImage: ''
+    imageUrl: '',
+    category: 'NEWS',
+    isPublished: true
   })
 
   useEffect(() => {
@@ -39,6 +43,12 @@ export default function PostManagement() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    
+    if (!session?.user?.id) {
+      alert('You must be logged in to create posts')
+      return
+    }
+
     setIsLoading(true)
 
     try {
@@ -48,12 +58,18 @@ export default function PostManagement() {
       
       const method = editingItem ? 'PUT' : 'POST'
 
+      // Add authorId to formData
+      const postData = {
+        ...formData,
+        authorId: session.user.id
+      }
+
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(postData),
       })
 
       if (response.ok) {
@@ -99,7 +115,9 @@ export default function PostManagement() {
       title: item.title,
       content: item.content,
       excerpt: item.excerpt || '',
-      featuredImage: item.featuredImage || ''
+      imageUrl: item.imageUrl || '',
+      category: item.category || 'NEWS',
+      isPublished: item.isPublished !== undefined ? item.isPublished : true
     })
     setShowAddForm(true)
   }
@@ -109,14 +127,16 @@ export default function PostManagement() {
       title: '',
       content: '',
       excerpt: '',
-      featuredImage: ''
+      imageUrl: '',
+      category: 'NEWS',
+      isPublished: true
     })
     setEditingItem(null)
     setShowAddForm(false)
   }
 
   const handleImageUpload = (url) => {
-    setFormData(prev => ({ ...prev, featuredImage: url || '' }))
+    setFormData(prev => ({ ...prev, imageUrl: url || '' }))
   }
 
   const formatDate = (dateString) => {
@@ -155,17 +175,50 @@ export default function PostManagement() {
               {editingItem ? 'Edit' : 'Add'} Post
             </h4>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Title
-                </label>
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#234362] focus:border-transparent"
-                  required
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Title
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#234362] focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Category
+                  </label>
+                  <select
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#234362] focus:border-transparent"
+                    required
+                  >
+                    <option value="NEWS">News</option>
+                    <option value="EVENTS">Events</option>
+                    <option value="ACHIEVEMENTS">Achievements</option>
+                    <option value="ANNOUNCEMENTS">Announcements</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status
+                  </label>
+                  <select
+                    value={formData.isPublished ? 'published' : 'draft'}
+                    onChange={(e) => setFormData({ ...formData, isPublished: e.target.value === 'published' })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#234362] focus:border-transparent"
+                  >
+                    <option value="published">Published</option>
+                    <option value="draft">Draft</option>
+                  </select>
+                </div>
               </div>
 
               <div>
@@ -201,7 +254,7 @@ export default function PostManagement() {
                 </label>
                 <ImageUpload
                   onUploadComplete={handleImageUpload}
-                  currentImage={formData.featuredImage}
+                  currentImage={formData.imageUrl}
                   folder="invizone/posts"
                 />
               </div>
@@ -242,10 +295,10 @@ export default function PostManagement() {
             {posts.map((post) => (
               <div key={post.id} className="p-6 hover:bg-gray-50 transition-colors">
                 <div className="flex gap-4">
-                  {post.featuredImage && post.featuredImage.trim() !== '' && (
+                  {post.imageUrl && post.imageUrl.trim() !== '' && (
                     <div className="relative w-32 h-24 rounded-lg overflow-hidden flex-shrink-0">
                       <Image
-                        src={post.featuredImage}
+                        src={post.imageUrl}
                         alt={post.title}
                         fill
                         className="object-cover"
@@ -253,9 +306,14 @@ export default function PostManagement() {
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-semibold text-lg mb-1">{post.title}</h4>
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <h4 className="font-semibold text-lg">{post.title}</h4>
+                      <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded whitespace-nowrap">
+                        {post.category}
+                      </span>
+                    </div>
                     <p className="text-sm text-gray-500 mb-2">
-                      {formatDate(post.createdAt)}
+                      📅 {formatDate(post.createdAt)} · ✍️ {post.author?.name || 'Unknown'}
                     </p>
                     {post.excerpt && (
                       <p className="text-sm text-gray-600 mb-2 line-clamp-2">{post.excerpt}</p>

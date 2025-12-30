@@ -36,7 +36,13 @@ export default function AchievementManagement() {
       
       if (achievementsRes.ok) {
         const data = await achievementsRes.json()
-        setAchievements(Array.isArray(data) ? data : [])
+        // API returns grouped by year object, flatten to array
+        if (typeof data === 'object' && !Array.isArray(data)) {
+          const flattenedAchievements = Object.values(data).flat()
+          setAchievements(flattenedAchievements)
+        } else {
+          setAchievements(Array.isArray(data) ? data : [])
+        }
       } else {
         setAchievements([])
       }
@@ -117,8 +123,8 @@ export default function AchievementManagement() {
     setFormData({
       title: item.title,
       description: item.description || '',
-      imageUrl: item.imageUrl || '',
-      category: item.category,
+      imageUrl: item.image || item.imageUrl || '',
+      category: item.category || 'ACADEMIC',
       year: item.year,
       studentIds: item.students?.map(s => s.id) || []
     })
@@ -314,10 +320,10 @@ export default function AchievementManagement() {
                 className="bg-white rounded-lg shadow border p-4"
               >
                 <div className="flex gap-4">
-                  {item.imageUrl && item.imageUrl.trim() !== '' && (
+                  {(item.image || item.imageUrl) && (item.image?.trim() !== '' || item.imageUrl?.trim() !== '') && (
                     <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
                       <Image
-                        src={item.imageUrl}
+                        src={item.image || item.imageUrl}
                         alt={item.title}
                         fill
                         className="object-cover"
@@ -326,18 +332,24 @@ export default function AchievementManagement() {
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                      <h4 className="font-semibold text-lg">{item.title}</h4>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">{item.icon || '🏆'}</span>
+                        <h4 className="font-semibold text-lg">{item.title}</h4>
+                      </div>
                       <span className="text-xs bg-gray-100 px-2 py-1 rounded whitespace-nowrap">
                         {item.year}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">{item.category}</p>
+                    <p className="text-xs text-gray-500 mt-1">{item.category || 'GENERAL'}</p>
                     {item.description && (
                       <p className="text-sm text-gray-600 mt-2 line-clamp-2">{item.description}</p>
                     )}
+                    {item.date && (
+                      <p className="text-xs text-gray-400 mt-1">📅 {item.date}</p>
+                    )}
                     {item.students && item.students.length > 0 && (
                       <p className="text-xs text-gray-500 mt-2">
-                        {item.students.length} student{item.students.length > 1 ? 's' : ''} associated
+                        👥 {item.students.length} student{item.students.length > 1 ? 's' : ''} associated
                       </p>
                     )}
                     <div className="flex space-x-2 mt-3">

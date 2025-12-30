@@ -13,6 +13,7 @@ export default function GalleryManagement() {
   const [editingItem, setEditingItem] = useState(null)
   const [formData, setFormData] = useState({
     title: '',
+    alt: '',
     description: '',
     imageUrl: '',
     category: 'CLASS'
@@ -50,12 +51,24 @@ export default function GalleryManagement() {
       
       const method = editingItem ? 'PUT' : 'POST'
 
+      // For update (PUT), only include imageUrl if it was changed
+      const payload = editingItem 
+        ? {
+            title: formData.title,
+            alt: formData.alt,
+            description: formData.description,
+            category: formData.category,
+            // Only include imageUrl if it's different from original
+            ...(formData.imageUrl !== editingItem.imageUrl && { imageUrl: formData.imageUrl })
+          }
+        : formData // For new items, include everything
+
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       })
 
       if (response.ok) {
@@ -99,6 +112,7 @@ export default function GalleryManagement() {
     setEditingItem(item)
     setFormData({
       title: item.title,
+      alt: item.alt || item.title,
       description: item.description || '',
       imageUrl: item.imageUrl,
       category: item.category
@@ -109,6 +123,7 @@ export default function GalleryManagement() {
   const resetForm = () => {
     setFormData({
       title: '',
+      alt: '',
       description: '',
       imageUrl: '',
       category: 'CLASS'
@@ -164,19 +179,33 @@ export default function GalleryManagement() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Category
+                    Alt Text
                   </label>
-                  <select
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  <input
+                    type="text"
+                    value={formData.alt}
+                    onChange={(e) => setFormData({ ...formData, alt: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#234362] focus:border-transparent"
+                    placeholder="Image description for accessibility"
                     required
-                  >
-                    {CATEGORIES.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
+                  />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Category
+                </label>
+                <select
+                  value={formData.category}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#234362] focus:border-transparent"
+                  required
+                >
+                  {CATEGORIES.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
               </div>
 
               <div>
@@ -194,7 +223,7 @@ export default function GalleryManagement() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Image
+                  Image {editingItem && <span className="text-gray-500 text-xs">(Optional - leave empty to keep current image)</span>}
                 </label>
                 <ImageUpload
                   onUploadComplete={handleImageUpload}
@@ -207,7 +236,7 @@ export default function GalleryManagement() {
               <div className="flex space-x-3 pt-4">
                 <button
                   type="submit"
-                  disabled={isLoading || !formData.imageUrl}
+                  disabled={isLoading || (!editingItem && !formData.imageUrl)}
                   className="flex-1 px-4 py-2 bg-[#234362] text-white rounded-lg hover:bg-[#1a2f4a] transition-colors disabled:opacity-50"
                 >
                   {isLoading ? 'Saving...' : editingItem ? 'Update' : 'Add'}
@@ -244,7 +273,7 @@ export default function GalleryManagement() {
                 className="bg-white rounded-lg shadow-md overflow-hidden"
               >
                 <div className="relative h-48 bg-gray-200">
-                  {item.imageUrl && item.imageUrl.trim() !== '' ? (
+                  {item.src && item.src.trim() !== '' ? (
                     <Image
                       src={item.src}
                       alt={item.title}

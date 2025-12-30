@@ -51,23 +51,29 @@ export default function StudentManagement() {
     setIsLoading(true)
 
     try {
+      const isTeacherMode = formData.isTeacher || activeTab === 'teachers'
+      
+      // Different API endpoints for students and teachers
+      const baseUrl = isTeacherMode ? '/api/teachers' : '/api/students'
       const url = editingStudent 
-        ? `/api/students/${editingStudent.id}`
-        : '/api/students'
+        ? `${baseUrl}/${editingStudent.id}`
+        : baseUrl
       
       const method = editingStudent ? 'PUT' : 'POST'
 
-      const payload = {
+      // Prepare payload based on type
+      const payload = isTeacherMode ? {
+        nip: formData.nis,
         name: formData.name,
-        nis: formData.nis,
+        subject: formData.subject || null,
+        bio: formData.bio || formData.quote || null,
         avatar: formData.avatar,
-        ...(formData.isTeacher ? {
-          isTeacher: true,
-          subject: formData.subject,
-          bio: formData.bio || formData.quote
-        } : {
-          quote: formData.quote
-        })
+        role: 'Class Leader Teacher'
+      } : {
+        nis: formData.nis,
+        name: formData.name,
+        quote: formData.quote || null,
+        avatar: formData.avatar
       }
 
       const response = await fetch(url, {
@@ -98,7 +104,9 @@ export default function StudentManagement() {
 
     setIsLoading(true)
     try {
-      const response = await fetch(`/api/students/${id}`, {
+      // Use correct API endpoint based on active tab
+      const baseUrl = activeTab === 'teachers' ? '/api/teachers' : '/api/students'
+      const response = await fetch(`${baseUrl}/${id}`, {
         method: 'DELETE',
       })
 
