@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { PrismaClient } from '@/lib/generated/prisma'
+import { slugify, generateUniqueSlug } from '@/lib/slugify'
 
 const prisma = new PrismaClient()
 
@@ -69,10 +70,22 @@ export async function PUT(request, props) {
       }
     }
 
+    // Generate new slug if title is being updated
+    let newSlug = existingPost.slug
+    if (title && title !== existingPost.title) {
+      const baseSlug = slugify(title)
+      newSlug = await generateUniqueSlug(baseSlug, async (checkSlug) => {
+        const post = await prisma.post.findUnique({
+          where: { slug: checkSlug }
+        })
+        return !!post && post.id !== id // Exclude current post from uniqueness check
+      })
+    }
+
     const updatedPost = await prisma.post.update({
       where: { id: id },
       data: {
-        ...(title && { title }),
+        ...(title && { title, slug: newSlug }),
         ...(content && { content }),
         ...(excerpt !== undefined && { excerpt }),
         ...(imageUrl !== undefined && { imageUrl }),

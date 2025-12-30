@@ -6,7 +6,7 @@ export default function ConditionalNavbar() {
   const pathname = usePathname()
   
   // Don't show navbar on admin pages
-  if (pathname?.startsWith('/admin')) {
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/auth')) {
     return null
   }
   

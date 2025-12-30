@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { PrismaClient } from '@/lib/generated/prisma'
+import { slugify, generateUniqueSlug } from '@/lib/slugify'
 
 const prisma = new PrismaClient()
 
@@ -35,8 +36,12 @@ export async function GET(request) {
       id: post.id,
       title: post.title,
       content: post.content,
+      excerpt: post.excerpt,
+      slug: post.slug,
       category: post.category || "general",
       imageUrl: post.imageUrl || "/gambar.webp",
+      isPublished: post.isPublished,
+      views: post.views || 0,
       createdAt: post.createdAt,
       author: post.author
     }))
@@ -55,7 +60,7 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json()
-    const { title, content, category, imageUrl, authorId, isPublished = false } = body
+    const { title, content, excerpt, category, imageUrl, authorId, isPublished = false } = body
 
     // Validate required fields
     if (!title || !content || !authorId) {
@@ -77,12 +82,23 @@ export async function POST(request) {
       )
     }
 
+    // Generate unique slug from title
+    const baseSlug = slugify(title)
+    const slug = await generateUniqueSlug(baseSlug, async (checkSlug) => {
+      const existing = await prisma.post.findUnique({
+        where: { slug: checkSlug }
+      })
+      return !!existing
+    })
+
     const newPost = await prisma.post.create({
       data: {
+        slug,
         title,
         content,
-        category: category || 'general',
-        imageUrl: imageUrl || '/gambar.webp',
+        excerpt: excerpt || null,
+        category: category || 'NEWS',
+        imageUrl: imageUrl || null,
         authorId,
         isPublished
       },

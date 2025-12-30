@@ -139,6 +139,7 @@ model Teacher {
 // Posts model for blog/news
 model Post {
   id          String       @id @default(cuid())
+  slug        String       @unique // URL-friendly identifier
   title       String
   content     String       @db.Text
   excerpt     String?      @db.Text

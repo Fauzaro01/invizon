@@ -9,11 +9,13 @@ import StudentTeacherManagement from '@/components/admin/StudentTeacherManagemen
 import PostManagement from '@/components/admin/PostManagement'
 import AchievementManagement from '@/components/admin/AchievementManagement'
 import GalleryManagement from '@/components/admin/GalleryManagement'
+import CommentManagement from '@/components/admin/CommentManagement'
 
 const menuItems = [
   { id: 'overview', name: 'Overview', icon: '📊' },
   { id: 'students', name: 'Students & Teachers', icon: '👥' },
   { id: 'posts', name: 'Blog Posts', icon: '📝' },
+  { id: 'comments', name: 'Comments', icon: '💬' },
   { id: 'achievements', name: 'Achievements', icon: '🏆' },
   { id: 'gallery', name: 'Gallery', icon: '📷' },
 ]
@@ -257,6 +259,7 @@ export default function AdminDashboard() {
 
                 {activeTab === 'students' && <StudentTeacherManagement />}
                 {activeTab === 'posts' && <PostManagement />}
+                {activeTab === 'comments' && <CommentManagement />}
                 {activeTab === 'achievements' && <AchievementManagement />}
                 {activeTab === 'gallery' && <GalleryManagement />}
               </motion.div>

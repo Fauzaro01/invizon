@@ -1,9 +1,17 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import ImageUpload from './ImageUpload'
 import { useSession } from 'next-auth/react'
+import dynamic from 'next/dynamic'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import rehypeRaw from 'rehype-raw'
+import rehypeSanitize from 'rehype-sanitize'
+import 'easymde/dist/easymde.min.css'
+
+const SimpleMDE = dynamic(() => import('react-simplemde-editor'), { ssr: false })
 
 export default function PostManagement() {
   const { data: session } = useSession()
@@ -11,6 +19,7 @@ export default function PostManagement() {
   const [isLoading, setIsLoading] = useState(true)
   const [showAddForm, setShowAddForm] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
+  const [showPreview, setShowPreview] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -19,6 +28,29 @@ export default function PostManagement() {
     category: 'NEWS',
     isPublished: true
   })
+
+  const editorOptions = useMemo(() => ({
+    spellChecker: false,
+    placeholder: 'Write your post content in markdown...',
+    toolbar: [
+      'bold', 'italic', 'heading', '|',
+      'quote', 'code', 'table', '|',
+      'unordered-list', 'ordered-list', '|',
+      'link', 'image', '|',
+      'preview', 'side-by-side', 'fullscreen', '|',
+      'guide'
+    ],
+    status: ['lines', 'words', 'cursor'],
+    autosave: {
+      enabled: true,
+      uniqueId: 'post-editor',
+      delay: 1000,
+    },
+    renderingConfig: {
+      singleLineBreaks: false,
+      codeSyntaxHighlighting: true,
+    }
+  }), [])
 
   useEffect(() => {
     fetchPosts()
@@ -235,17 +267,62 @@ export default function PostManagement() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Content
-                </label>
-                <textarea
-                  value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#234362] focus:border-transparent"
-                  rows="10"
-                  required
-                  placeholder="Write your post content here..."
-                />
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Content (Markdown)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowPreview(!showPreview)}
+                    className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+                  >
+                    {showPreview ? '✏️ Edit' : '👁️ Preview'}
+                  </button>
+                </div>
+                
+                {!showPreview ? (
+                  <SimpleMDE
+                    value={formData.content}
+                    onChange={(value) => setFormData({ ...formData, content: value })}
+                    options={editorOptions}
+                  />
+                ) : (
+                  <div className="border border-gray-300 rounded-lg p-6 min-h-[400px] bg-white prose prose-blue max-w-none">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      rehypePlugins={[rehypeRaw, rehypeSanitize]}
+                      components={{
+                        h1: ({ node, ...props }) => <h1 className="text-3xl font-bold mt-6 mb-4" {...props} />,
+                        h2: ({ node, ...props }) => <h2 className="text-2xl font-bold mt-5 mb-3" {...props} />,
+                        h3: ({ node, ...props }) => <h3 className="text-xl font-semibold mt-4 mb-2" {...props} />,
+                        p: ({ node, ...props }) => <p className="mb-4 leading-relaxed" {...props} />,
+                        ul: ({ node, ...props }) => <ul className="list-disc list-inside mb-4 space-y-2" {...props} />,
+                        ol: ({ node, ...props }) => <ol className="list-decimal list-inside mb-4 space-y-2" {...props} />,
+                        blockquote: ({ node, ...props }) => (
+                          <blockquote className="border-l-4 border-blue-500 pl-4 italic my-4 text-gray-600" {...props} />
+                        ),
+                        code: ({ node, inline, ...props }) => 
+                          inline ? (
+                            <code className="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono text-red-600" {...props} />
+                          ) : (
+                            <code className="block bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto my-4" {...props} />
+                          ),
+                        a: ({ node, ...props }) => <a className="text-blue-600 hover:text-blue-800 underline" {...props} />,
+                        img: ({ node, ...props }) => <img className="rounded-lg my-4 shadow-md max-w-full" {...props} />,
+                        table: ({ node, ...props }) => (
+                          <div className="overflow-x-auto my-4">
+                            <table className="min-w-full divide-y divide-gray-200 border" {...props} />
+                          </div>
+                        ),
+                        thead: ({ node, ...props }) => <thead className="bg-gray-50" {...props} />,
+                        th: ({ node, ...props }) => <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase border" {...props} />,
+                        td: ({ node, ...props }) => <td className="px-4 py-2 text-sm text-gray-700 border" {...props} />
+                      }}
+                    >
+                      {formData.content || '*No content yet. Start writing in the editor!*'}
+                    </ReactMarkdown>
+                  </div>
+                )}
               </div>
 
               <div>
