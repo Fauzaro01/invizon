@@ -14,11 +14,7 @@ export default function GalleryPage() {
     const fetchImages = async () => {
       try {
         setIsLoading(true)
-        const url = activeCategory === 'all' 
-          ? '/api/gallery' 
-          : `/api/gallery?category=${activeCategory}`
-          
-        const response = await fetch(url)
+        const response = await fetch('/api/gallery')
         
         if (!response.ok) {
           throw new Error('Failed to fetch gallery images')
@@ -35,9 +31,38 @@ export default function GalleryPage() {
     }
 
     fetchImages()
-  }, [activeCategory])
+  }, [])
 
-  const filteredImages = galleryImages
+  // Disable scroll when image modal is open
+  useEffect(() => {
+    if (selectedImage) {
+      // Save current scroll position
+      const scrollY = window.scrollY
+      
+      // Disable scroll on body
+      document.body.style.overflow = 'hidden'
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${scrollY}px`
+      document.body.style.width = '100%'
+      
+      return () => {
+        // Re-enable scroll
+        document.body.style.overflow = ''
+        document.body.style.position = ''
+        document.body.style.top = ''
+        document.body.style.width = ''
+        
+        // Restore scroll position
+        window.scrollTo(0, scrollY)
+      }
+    }
+  }, [selectedImage])
+
+  const filteredImages = activeCategory === 'all' 
+    ? galleryImages 
+    : galleryImages.filter(img => img.category?.toUpperCase() === activeCategory.toUpperCase())
+
+  const categories = ['all', 'CLASS', 'EVENTS', 'TRIPS', 'ACHIEVEMENTS']
 
   return (
     <div className="min-h-screen bg-gray-50 pt-24 pb-16 px-4 sm:px-6">
@@ -59,11 +84,15 @@ export default function GalleryPage() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          {['all', 'class', 'events', 'trips'].map(category => (
+          {categories.map(category => (
             <motion.button
               key={category}
               onClick={() => setActiveCategory(category)}
-              className={`px-4 py-2 rounded-full capitalize text-sm font-medium ${activeCategory === category ? 'bg-[#234362] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+              className={`px-4 py-2 rounded-full capitalize text-sm font-medium ${
+                activeCategory === category 
+                  ? 'bg-[#234362] text-white' 
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -97,18 +126,28 @@ export default function GalleryPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.05 }}
                 whileHover={{ scale: 1.02 }}
-                className="relative aspect-square overflow-hidden rounded-xl shadow-md cursor-pointer"
+                className="relative aspect-square overflow-hidden rounded-xl shadow-md cursor-pointer group"
                 onClick={() => setSelectedImage(image)}
               >
                 <Image
                   src={image.src}
-                  alt={image.alt}
+                  alt={image.title}
                   fill
-                  className="object-cover transition-transform duration-300 hover:scale-105"
-                  sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                  <span className="text-white text-sm font-medium">{image.alt}</span>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                  <span className="text-white text-sm font-semibold drop-shadow-lg">
+                    {image.title}
+                  </span>
+                  {image.description && (
+                    <span className="text-white/80 text-xs mt-1 line-clamp-2 drop-shadow">
+                      {image.description}
+                    </span>
+                  )}
+                </div>
+                <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-medium text-gray-700">
+                  {image.category}
                 </div>
               </motion.div>
             ))}
@@ -129,40 +168,84 @@ export default function GalleryPage() {
           </motion.div>
         )}
 
+        {/* Responsive Image Modal/Lightbox */}
         <AnimatePresence>
           {selectedImage && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+              className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4"
               onClick={() => setSelectedImage(null)}
             >
-              <motion.div
-                initial={{ scale: 0.9 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0.9 }}
-                className="relative w-full max-w-4xl max-h-[90vh]"
-                onClick={e => e.stopPropagation()}
+              <motion.button
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                className="absolute top-4 right-4 z-10 bg-white/10 backdrop-blur-sm text-white p-3 rounded-full hover:bg-white/20 transition-all"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setSelectedImage(null)
+                }}
               >
-                <Image
-                  src={selectedImage.src}
-                  alt={selectedImage.alt}
-                  width={1200}
-                  height={800}
-                  className="object-contain w-full h-full rounded-lg"
-                />
-                <button 
-                  className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition"
-                  onClick={() => setSelectedImage(null)}
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-                <div className="absolute bottom-4 left-0 right-0 text-center text-white px-4">
-                  {selectedImage.alt}
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </motion.button>
+
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ type: 'spring', damping: 25 }}
+                className="relative w-full h-full flex flex-col items-center justify-center"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Responsive Image Container */}
+                <div className="relative w-full h-full max-w-7xl max-h-[85vh] flex items-center justify-center">
+                  <div className="relative w-full h-full">
+                    <Image
+                      src={selectedImage.src}
+                      alt={selectedImage.title}
+                      fill
+                      className="object-contain rounded-lg"
+                      sizes="100vw"
+                      quality={95}
+                      priority
+                    />
+                  </div>
                 </div>
+
+                {/* Image Info */}
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 text-white"
+                >
+                  <div className="max-w-7xl mx-auto">
+                    <h3 className="text-xl sm:text-2xl font-bold mb-2">
+                      {selectedImage.title}
+                    </h3>
+                    {selectedImage.description && (
+                      <p className="text-sm sm:text-base text-white/80 mb-2">
+                        {selectedImage.description}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-3 text-xs sm:text-sm text-white/60">
+                      <span className="bg-white/10 px-2 py-1 rounded">
+                        {selectedImage.category}
+                      </span>
+                      <span>
+                        {new Date(selectedImage.createdAt).toLocaleDateString('id-ID', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                </motion.div>
               </motion.div>
             </motion.div>
           )}
