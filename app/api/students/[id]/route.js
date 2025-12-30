@@ -3,14 +3,24 @@ import { PrismaClient } from '@/lib/generated/prisma'
 
 const prisma = new PrismaClient()
 
-// GET - Fetch single student by ID
+// GET - Fetch single student by ID with achievements
 export async function GET(request, props) {
   const params = await props.params;
   try {
     const { id } = params
     
     const student = await prisma.student.findUnique({
-      where: { id: id }
+      where: { id: id },
+      include: {
+        achievements: {
+          include: {
+            achievement: true
+          },
+          orderBy: {
+            earnedAt: 'desc'
+          }
+        }
+      }
     })
 
     if (!student) {
@@ -73,7 +83,6 @@ export async function PUT(request, props) {
 // DELETE - Delete student
 export async function DELETE(request, props) {
   const params = await props.params;
-  console.log(params);
   try {
     const { id } = params
     

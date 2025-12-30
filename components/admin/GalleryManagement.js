@@ -246,7 +246,7 @@ export default function GalleryManagement() {
                 <div className="relative h-48 bg-gray-200">
                   {item.imageUrl && item.imageUrl.trim() !== '' ? (
                     <Image
-                      src={item.imageUrl}
+                      src={item.src}
                       alt={item.title}
                       fill
                       className="object-cover"
