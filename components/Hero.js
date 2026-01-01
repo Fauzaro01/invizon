@@ -1,9 +1,9 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { motion, useScroll, useTransform, useInView } from 'framer-motion'
 import { ChevronDown, Award, Users, TrendingUp } from 'lucide-react'
+import GridMotion from './ui/GridMotion'
 
 function Counter({ end, duration = 2, suffix = '' }) {
   const [count, setCount] = useState(0)
@@ -42,8 +42,6 @@ export default function Hero() {
     offset: ['start start', 'end start']
   })
 
-  const y = useTransform(scrollYProgress, [0, 1], ['0%', '30%'])
-  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0.3])
   const contentOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0])
   const scale = useTransform(scrollYProgress, [0, 0.3], [1, 0.95])
 
@@ -54,33 +52,32 @@ export default function Hero() {
     })
   }
 
+  // Data untuk GridMotion - bisa diisi dengan gambar atau item lain
+  const gridItems = [
+    'https://res.cloudinary.com/dtzcamtgb/image/upload/v1750305332/upacara11_d4xp4p.jpg',
+    'https://res.cloudinary.com/dtzcamtgb/image/upload/v1750305329/hariguru10_2_hvusmw.jpg',
+    'https://res.cloudinary.com/dtzcamtgb/image/upload/v1750305327/hariguru10_yzjyef.jpg',
+    'https://res.cloudinary.com/dtzcamtgb/image/upload/v1750305331/ramadhanberkah2025_uzyltx.jpg',
+    'https://res.cloudinary.com/dtzcamtgb/image/upload/v1750305326/classmeett11_bxu14n.jpg',
+    'https://res.cloudinary.com/dtzcamtgb/image/upload/v1750305325/ciwi_sbulmj.jpg',
+    'https://res.cloudinary.com/dtzcamtgb/image/upload/v1750305329/haribatik11_hsskpd.jpg',
+    'https://res.cloudinary.com/dtzcamtgb/image/upload/v1750319199/bukber2024_pzkzvk.jpg',
+  ]
+
   return (
     <section 
       ref={heroRef}
-      className="relative h-screen min-h-[700px] overflow-hidden"
+      className="relative h-screen min-h-[700px] overflow-hidden bg-black"
     >
-      {/* Parallax Background */}
-      <motion.div 
-        className="absolute inset-0"
-        style={{ y }}
-      >
-        <Image 
-          src="/hero.webp"
-          alt="Invizone Class Photo"
-          fill
-          className="object-cover"
-          priority
-          quality={100}
-          sizes="100vw"
-        />
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
-      </motion.div>
+      {/* GridMotion Background */}
+      <div className="absolute inset-0 z-0">
+        <GridMotion items={gridItems} gradientColor="rgba(35, 67, 98, 0.7)" />
+      </div>
 
-      <motion.div 
-        className="absolute inset-0 bg-[#234362]/20"
-        style={{ opacity }}
-      />
+      {/* Overlay untuk meningkatkan kontras */}
+      <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/60 via-black/40 to-black/70" />
+      {/* Overlay untuk meningkatkan kontras */}
+      <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/60 via-black/40 to-black/70" />
 
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
